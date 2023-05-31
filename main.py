@@ -83,7 +83,7 @@ def validar_rango(numero:float,min:float,max:float) -> bool:
         retorno = True
     return retorno
 
-def pedir_un_numero(texto_a_mostrar:str, numero_int:bool=True) -> int |float|bool:
+def pedir_un_numero(texto_a_mostrar:str, numero_int:bool=True) -> int|float|bool:
     '''
     Esta funcion le pedira al usuario que ingrese un numero
     Recibe el texto que quiere ser mostrado en consola al momento de pedir el dato y un booleano que indica si debe ser un numero entero (True por defecto) o flotante (False)
@@ -619,9 +619,9 @@ def calcular_mostrar_jugador_con_mas_logros(lista_jugadores:list) ->bool:
     '''
     retorno = -1
     if len(lista_jugadores) > 0:
-        indice_max =  0
+        indice_max = 0
         for i in range(1, len(lista_jugadores)):
-            if i == 0 or len(lista_jugadores[i]["logros"]) > len(lista_jugadores[i]["logros"]):     # Se busca el jugador con la Maxima cantidad de logros
+            if len(lista_jugadores[i]["logros"]) > len(lista_jugadores[i]["logros"]):     # Se busca el jugador con la Maxima cantidad de logros
                 indice_max = i
         print("\nEl jugador con mas logros es:\n")                                          
         print(jugador_obtener_nombre_posicion(lista_jugadores[indice_max]))                         # Muestra los jugadores en el siguiente formato: Nombre: Michael Jordan - Posicion: Escolta 
@@ -660,7 +660,10 @@ def imprimir_menu():
     print("18. Mostrar el Jugador con mayor cantidad de temporadas")
     print("19. Mostrar los Jugador con mayor porcentaje de tiros de campo a partir de un numero ingresado, ordenados por posicion en la cancha")
     print("20. Punto Bonus")
-    print("21. Salir del programa\n")
+    print("21. Mostrar la cantidad de jugadores por posicion")
+    print("22. Mostrar la lista de Jugadores ordanada de forma descendente por la cantidad de All-Star")
+    print("23. Mostrar los Jugadores con mas estadistica de cada una")
+    print("24. Salir del programa\n")
 
 def pedir_opcion_menu_principal_numero(texto_a_mostrar:str,intentos:int,min:int,max:int):
     '''
@@ -681,7 +684,7 @@ def dream_team_app(lista_jugadores:list):
     .Funcion principal del programa que se encargara de la ejecucion de las funciones del menu
     '''
     while True:
-        opcion = pedir_opcion_menu_principal_numero("Ingrese la opcion: ",6,1,21)
+        opcion = pedir_opcion_menu_principal_numero("Ingrese la opcion: ",6,1,24)
         print()
         match opcion:
             case 1:
@@ -739,6 +742,15 @@ def dream_team_app(lista_jugadores:list):
             case 20:
                 guardar_calcular_ranking_dream_team(lista_jugadores)
             case 21:
+                print("\nCantidad de Jugadores por posicion:\n")
+                mostrar_cantidad_jugadores_key(lista_jugadores, "posicion")
+            case 22:
+                print("\nLista de jugadores ordenada por cantidad de All-Star:\n")
+                mostrar_ordenar_jugadores_cantidad_all_stars(lista_jugadores)
+            case 23:
+                print("\nLos Jugadores con mas estadistica de cada una son:\n")
+                mostrar_calcular_mejor_jugador_cada_estadistica(lista_jugadores)
+            case 24:
                 if pedir_confirmacion("Esta seguro que quiere salir del programa? Ingrese [s-si-y-yes] para confirmar o cualquier otra tecla para seguir en el programa: "):
                     break
                 else:
@@ -840,6 +852,151 @@ def guardar_calcular_ranking_dream_team(lista_jugadores:list) -> bool:
         print("\nError... La lista esta vacia")
     
     return retorno
+
+# ------------------------------------------------------------------------------------------------------------------------------------------------ #
+# ------------------------------------------------  Funciones ejercicion extra  ------------------------------------------------------------------ #
+# ------------------------------------------------------------------------------------------------------------------------------------------------ #
+def obtener_lista_de_key_jugadores(lista_jugadores:list, key:str) -> set:
+    '''
+    . Esta función itera la lista de jugadores guardando las posiciones de los Jugadores en una lista
+    . Recibe por parámetro la lista de jugadores y un string que representará el tipo de dato/key a buscar
+    . Devuelve un set de datos o -1 si fallo
+    '''
+    retorno = -1
+    if len(lista_jugadores) > 0:
+        lista_aux = []
+        for jugador in lista_jugadores:
+            aux = jugador[key]
+            lista_aux.append(aux)
+            retorno = set(lista_aux)
+    else:
+        print("\nError... La lista esta vacia")    
+
+    return retorno
+
+def obtener_cantidad_jugadores_key(lista_jugadores:list, set_datos_posiciones:set, key:str) -> dict:
+    '''
+    Esta funcion iterara el set de posiciones y creara un diccionario con cada variable del set como key y el valor de cada una sera un contador
+    A su vez recorrera la lista de jugadores, evaluara la clave que da origen al set de datos y en caso de que el valor corresponda guardara aumentara
+    en uno el contador. Si el diccionario fue creado se inicializa en 1
+    Recibe la lista de jugadores, el set de datos con las posiciones, la key, en este caso de posiciones
+    Esta función retornará un diccionario con cada variedad como key y una lista de diccionarios como valor, o -1 si fallo
+    '''
+    retorno = -1
+    if len(lista_jugadores) > 0:
+        diccionario_contador = {}
+        for tipo in set_datos_posiciones:
+            if tipo not in diccionario_contador:
+                diccionario_contador[tipo] = 1
+            for jugador in lista_jugadores:           
+                if jugador[key] == tipo:
+                    diccionario_contador[tipo] += 1
+        retorno = diccionario_contador
+    else:
+        print("\nError... La lista esta vacia")  
+
+    return retorno
+
+def mostrar_cantidad_jugadores_key(lista_jugadores:list, key:str):
+    '''
+    Esta funcion contara la cantidad de jugadores por posicion y lo mostrara en pantalla
+    Recibe la lista de jugadores y la key del tipo que se quiere contar
+    Devuelve False si fallo o True si se ejecuto
+    '''
+    retorno = False
+    if len(lista_jugadores) > 0:
+        set_datos_posiciones = obtener_lista_de_key_jugadores(lista_jugadores, key)
+        diccionario_posiciones = obtener_cantidad_jugadores_key(lista_jugadores, set_datos_posiciones, key)
+        for posicion,cantidad in diccionario_posiciones.items():
+            print("{0}: {1}".format(posicion,cantidad))
+        retorno = True  
+    else:
+        print("\nError... La lista esta vacia")  
+        
+    return retorno
+
+# ------------------------------------------------------------------------------------------------------------------------------------------------ #
+def calcular_cantidad_all_stars(lista_jugadores:list) ->list:
+    '''
+    Esta funcion calculara la cantidad de all stars que tiene cada jugador y creara una lista de jugadores con clave nombre y clave cantidad de all stars
+    Recibe la lista de jugadores
+    Devuelve -1 si fallo o la lista si se ejecuto
+    '''
+    retorno = -1
+    if len(lista_jugadores) > 0:
+        lista_all_star = []
+        for jugador in lista_jugadores:
+            for logro in jugador["logros"]:
+                if re.search(r"all-star", logro, re.I) and re.search(r"[0-9]+", logro):
+                    diccionario_aux = {}
+                    diccionario_aux["nombre"] = jugador["nombre"]
+                    diccionario_aux["cant_all_stars"] = int(logro[:2])
+                    lista_all_star.append(diccionario_aux)
+                    break
+        retorno = lista_all_star
+    else:
+        print("\nError... La lista esta vacia")  
+        
+    return retorno  
+
+def mostrar_ordenar_jugadores_cantidad_all_stars(lista_jugadores:list):
+    '''
+    Esta funcion ordenara la cantidad de jugadores por cantidad de all stars que tengan
+    Recibe la lista de jugadores y la key del tipo que se quiere contar
+    Devuelve False si fallo o True si se ejecuto
+    '''
+    retorno = False
+    if len(lista_jugadores) > 0:
+        lista_nombre_cantallstar = calcular_cantidad_all_stars(lista_jugadores)
+        lista_nombre_cantallstar = quick_sort_jugadores_key(lista_nombre_cantallstar, "cant_all_stars", False)
+        for jugador in lista_nombre_cantallstar:
+            print("{0}: {1}".format(jugador["nombre"], jugador["cant_all_stars"]))
+        retorno = True  
+    else:
+        print("\nError... La lista esta vacia")  
+        
+    return retorno    
+
+# ------------------------------------------------------------------------------------------------------------------------------------------------ #
+def obtener_lista_de_key_jugadores_estadistica(lista_jugadores:list) -> set:
+    '''
+    . Esta función itera la lista de jugadores guardando en una lista las distintas claves de estadistica, recorre todos los jugadores
+    por si no todos tienen todo
+    . Recibe por parámetro la lista de jugadores y un string que representará el tipo de dato/key a buscar
+    . Devuelve un set de datos o -1 si fallo
+    '''
+    retorno = -1
+    if len(lista_jugadores) > 0:
+        lista_aux = []
+        for jugador in lista_jugadores:
+            for estadistica in jugador["estadisticas"]:
+                lista_aux.append(estadistica)
+        retorno = set(lista_aux)
+    else:
+        print("\nError... La lista esta vacia")    
+
+    return retorno
+
+def mostrar_calcular_mejor_jugador_cada_estadistica(lista_jugadores:list):
+    '''
+    Esta funcion ordenara la cantidad de jugadores por cantidad de all stars que tengan
+    Recibe la lista de jugadores y la key del tipo que se quiere contar
+    Devuelve False si fallo o True si se ejecuto
+    '''
+    retorno = False
+    if len(lista_jugadores) > 0:
+        set_claves_estadistica = obtener_lista_de_key_jugadores_estadistica(lista_jugadores)
+        for clave in set_claves_estadistica:
+            jugador = calcular_jugador_max_key_estadistica(lista_jugadores, clave)
+            if re.search(r"promedio", clave, re.I):
+                print("El mayor {0} es para: {1} con: {2}".format(noramlizar_clave_estadistica_jugador(clave), jugador["nombre"], jugador["estadisticas"][clave]))
+            else:
+                print("La mayor cantidad de {0} es para: {1} con: {2}".format(noramlizar_clave_estadistica_jugador(clave), jugador["nombre"], jugador["estadisticas"][clave]))
+        retorno = True  
+    else:
+        print("\nError... La lista esta vacia")  
+        
+    return retorno    
 
 # ------------------------------------------------------------------------------------------------------------------------------------------------ #
 # ------------------------------------------------------------------------------------------------------------------------------------------------ #
